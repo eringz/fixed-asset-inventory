@@ -75,13 +75,6 @@ fun AssetCard(
 
             // --- MAIN CONTENT ---
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Mas malaki ang Description dahil ito ang "Human-friendly" name
-//                Text(
-//                    text = "${asset.description.ifBlank { "No Description" }} - ${asset.assetNumber}"  ,
-//                    fontWeight = FontWeight.Bold,
-//                    fontSize = 18.sp,
-//                    color = Color.Black
-//                )
                 Text(
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(

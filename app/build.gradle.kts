@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.fixedassetinventory"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -69,4 +69,8 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation("org.apache.poi:poi-ooxml:5.2.3")
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+    implementation("com.itextpdf:itextg:5.5.10")
+
 }

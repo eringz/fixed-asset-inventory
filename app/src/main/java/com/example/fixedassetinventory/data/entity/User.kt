@@ -11,6 +11,7 @@ import androidx.room.PrimaryKey
 class User (
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+
     val username: String,
     val passwordHash: String
 )

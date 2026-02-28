@@ -54,6 +54,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fixedassetinventory.data.entity.Asset
 import com.example.fixedassetinventory.ui.components.AssetCard
+import com.example.fixedassetinventory.ui.components.ExportOptionButton
 import com.example.fixedassetinventory.viewmodel.AssetViewModel
 import com.example.fixedassetinventory.viewmodel.ValidationStatus
 
@@ -70,6 +71,7 @@ fun DashboardScreen(onLogout: () -> Unit ) {
     var showAddDialog by remember { mutableStateOf(false) }
     var assetByEdit by remember { mutableStateOf<Asset?>(null) }
     var assetByDelete by remember { mutableStateOf<Asset?>(null) }
+    var showExportDialog by remember { mutableStateOf(false) }
 
 
     // ----------------------------------------------------------------------------------
@@ -97,12 +99,11 @@ fun DashboardScreen(onLogout: () -> Unit ) {
     }
 
 
-
     // ----------------------------------------------------------------------------------
     //                                       DIALOG SECTION
     //-----------------------------------------------------------------------------------
 
-
+    // CREATE DIALOG
     if (showAddDialog) {
         var newAssetNo by remember { mutableStateOf("") }
         var newDesc by remember { mutableStateOf("") }
@@ -155,25 +156,6 @@ fun DashboardScreen(onLogout: () -> Unit ) {
             dismissButton = {
                 androidx.compose.material3.TextButton(onClick = { showAddDialog = false }) {
                     Text("Cancel")
-                }
-            }
-        )
-    }
-
-    if (summary != null) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { viewModel.clearImportSummary() },
-            confirmButton = {
-                androidx.compose.material3.TextButton(onClick = { viewModel.clearImportSummary() }) {
-                    Text("Ok")
-                }
-            },
-            title = { Text("Import Result", fontWeight = FontWeight.Bold)},
-            text = {
-                Column {
-                    Text("Total Records: ${summary.total}")
-                    Text("Successfully imported: ${summary.success}")
-                    Text("Skipped Duplicate Asset: ${summary.skipped}", color = Color.Red)
                 }
             }
         )
@@ -243,6 +225,74 @@ fun DashboardScreen(onLogout: () -> Unit ) {
         )
     }
 
+    // IMPORT DIALOG
+    if (summary != null) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { viewModel.clearImportSummary() },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { viewModel.clearImportSummary() }) {
+                    Text("Ok")
+                }
+            },
+            title = { Text("Import Result", fontWeight = FontWeight.Bold)},
+            text = {
+                Column {
+                    Text("Total Records: ${summary.total}")
+                    Text("Successfully imported: ${summary.success}")
+                    Text("Skipped Duplicate Asset: ${summary.skipped}", color = Color.Red)
+                }
+            }
+        )
+    }
+
+    // EXPORT DIALOG
+    if (showExportDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showExportDialog = false },
+            title = { Text("Export Report", fontWeight = FontWeight.Bold)},
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Select Export File Format")
+
+                    ExportOptionButton(
+                        label = "CSV",
+//                        icon = Icons.Default.Abc,
+                        onClick = {
+                            viewModel.exportToCsv(context)
+                            showExportDialog = false
+                        }
+                    )
+
+                    ExportOptionButton(
+                        label = "Excel",
+//                        icon = androidx.compose.material.icons.Icons.Default.A,
+                        onClick = {
+                            viewModel.exportToExcel(context)
+                            showExportDialog = false
+                        }
+                    )
+
+                    ExportOptionButton(
+                        label = "PDF",
+//                        icon = androidx.compose.material.icons.Icons.Default.Info,
+                        onClick = {
+                            viewModel.exportToPdf(context)
+                            showExportDialog = false
+                        }
+                    )
+
+
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showExportDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     // ----------------------------------------------------------------------------------
     //                                  MAIN VIEW SECTION
     //------------------------------------------------------------------------------------
@@ -288,7 +338,8 @@ fun DashboardScreen(onLogout: () -> Unit ) {
                             text = { Text("Export") },
                             onClick = {
                                 showMenu = false
-                                viewModel.exportToCsv(context)
+//                                viewModel.exportToCsv(context)
+                                showExportDialog = true
                             },
                             leadingIcon = {
                                 Icon(Icons.Default.ArrowDropDown,

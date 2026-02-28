@@ -5,7 +5,9 @@ package com.example.fixedassetinventory.viewmodel
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,15 +15,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fixedassetinventory.data.dao.AssetDao
 import com.example.fixedassetinventory.data.entity.Asset
+import com.itextpdf.text.Document
+import com.itextpdf.text.Phrase
+import com.itextpdf.text.pdf.PdfPTable
+import com.itextpdf.text.pdf.PdfWriter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
+
 
 data class ImportSummary (
     val total: Int = 0,
@@ -194,7 +202,9 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
                 val dateStamp = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(java.util.Date())
                 val fileName = "asset_report_$dateStamp.csv"
 
-                val downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                val downloadsFolder = Environment.getExternalStoragePublicDirectory(
+                    DIRECTORY_DOWNLOADS
+                )
                 val file = File(downloadsFolder, fileName)
                 file.writeText(fullCsv)
 
@@ -211,9 +221,104 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
         }
     }
 
+    fun exportToExcel(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val assets = assetDao.getAllAssetsForExport()
+            val workbook = XSSFWorkbook()
+            val sheet = workbook.createSheet("Asset Report")
+
+            val headerRow = sheet.createRow(0)
+            val headers = listOf("asset_number", "description", "location", "remarks", "validate")
+            headers.forEachIndexed { index, title ->
+                headerRow.createCell(index).setCellValue(title)
+            }
+
+            assets.forEachIndexed { index, asset ->
+                val row = sheet.createRow(index + 1)
+                row.createCell(0).setCellValue(asset.assetNumber)
+                row.createCell(1).setCellValue(asset.description)
+                row.createCell(2).setCellValue(asset.location)
+                row.createCell(3).setCellValue(asset.remarks)
+                row.createCell(4).setCellValue(asset.validate)
+            }
+
+            val dateStamp = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(java.util.Date())
+            val fileName = "asset_report_$dateStamp.xlsx"
+            val file = File(Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS), fileName)
+
+            file.outputStream().use {fos ->
+                workbook.write(fos)
+                fos.flush()
+            }
+//            file.outputStream().use{ workbook.write(it) }
+            workbook.close()
+
+            withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Excel Saved: $fileName", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+
+    fun exportToPdf(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val assets = assetDao.getAllAssetsForExport()
+                val dateStamp = SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(java.util.Date())
+                val fileName = "asset_report_$dateStamp.pdf"
+                val file = File(Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS), fileName)
+
+                // 1. Initialize Document (iTextG)
+                val document = Document()
+
+                // 2. Open Stream
+                file.outputStream().use { fos ->
+                    // I-bind ang document sa stream
+                    PdfWriter.getInstance(document, fos)
+
+                    document.open()
+
+                    // 3. Create Table (5 columns)
+                    val table = PdfPTable(5)
+                    table.widthPercentage = 100f
+
+                    // Headers
+                    val headers = listOf("Asset No", "Description", "Location", "Remarks", "Status")
+                    headers.forEach {
+                        table.addCell(Phrase(it))
+                    }
+
+                    // Data Rows
+                    assets.forEach { asset ->
+                        table.addCell(Phrase(asset.assetNumber ?: ""))
+                        table.addCell(Phrase(asset.description ?: ""))
+                        table.addCell(Phrase(asset.location ?: ""))
+                        table.addCell(Phrase(asset.remarks ?: ""))
+                        table.addCell(Phrase(asset.validate ?: ""))
+                    }
+
+                    document.add(table)
+
+                    // 4. IMPORTANT: Close the document INSIDE the use block
+                    document.close()
+                }
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "PDF Export Success: $fileName", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                Log.e("PDF_FINAL_CRASH", "Crash: ${e.message}", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Fatal PDF Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
 
     fun closeDialog() {
         showValidationDialog = false
     }
 
 }
+
+
