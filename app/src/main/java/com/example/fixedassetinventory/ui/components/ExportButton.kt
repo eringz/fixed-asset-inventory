@@ -1,35 +1,48 @@
 package com.example.fixedassetinventory.ui.components
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color // Eto yung nawawalang import!
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun ExportOptionButton(
     label: String,
-//    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    containerColor: Color = MaterialTheme.colorScheme.primaryContainer, // Default na kulay
+    contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer   // Kulay ng text
 ) {
-    androidx.compose.material3.OutlinedButton(
+    androidx.compose.material3.Button(
         onClick = onClick,
-        modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp)
+        modifier = Modifier
+            .fillMaxWidth() // Para pantay-pantay ang haba nila sa column
+            .height(56.dp),  // Standard height para sa clickable buttons
+        shape = RoundedCornerShape(12.dp),
+        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+            containerColor = containerColor,
+            contentColor = contentColor
+        )
     ) {
-        androidx.compose.foundation.layout.Row(
-            modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+        // Dito natin ise-center ang label
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center // Eto ang "magic" para mag-center
         ) {
-//            androidx.compose.material3.Icon(
-////                imageVector = icon,
-//                contentDescription = null,
-//                tint = androidx.compose.material3.MaterialTheme.colorScheme.primary
-//            )
-            androidx.compose.foundation.layout.Spacer(androidx.compose.ui.Modifier.width(12.dp))
-            androidx.compose.material3.Text(
+            Text(
                 text = label,
-                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
             )
         }
     }

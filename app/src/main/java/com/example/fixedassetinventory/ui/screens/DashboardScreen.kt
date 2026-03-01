@@ -49,9 +49,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fixedassetinventory.data.entity.Asset
 import com.example.fixedassetinventory.ui.components.AssetCard
 import com.example.fixedassetinventory.ui.components.ExportOptionButton
@@ -61,7 +58,10 @@ import com.example.fixedassetinventory.viewmodel.ValidationStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(onLogout: () -> Unit ) {
+fun DashboardScreen(
+    viewModel: AssetViewModel,
+    onLogout: () -> Unit
+) {
     var showMenu by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
 
@@ -78,10 +78,6 @@ fun DashboardScreen(onLogout: () -> Unit ) {
     //                                  DATABASE DECLARATION
     //------------------------------------------------------------------------------------
     val context = LocalContext.current
-    val db = remember {com.example.fixedassetinventory.data.AppDatabase.getDatabase(context)}
-    val viewModel: AssetViewModel = viewModel(
-        factory = AssetViewModelFactory(db.assetDao())
-    )
     val assetList by viewModel.assets.collectAsState(initial = emptyList())
 
 
@@ -111,10 +107,28 @@ fun DashboardScreen(onLogout: () -> Unit ) {
         var newRem by remember { mutableStateOf("") }
 
         androidx.compose.material3.AlertDialog(
-            onDismissRequest = { /*TODO*/ },
+            onDismissRequest = {
+                showAddDialog = false
+                viewModel.clearAssetError()
+            },
             title = { Text("Asset Registration", fontWeight = FontWeight.Bold)},
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(24.dp), // Fixed height para reserved ang space
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (viewModel.assetError != null) {
+                            Text(
+                                text = viewModel.assetError!!,
+                                color = Color.Red,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                     OutlinedTextField(
                         value = newAssetNo,
                         onValueChange = { newAssetNo = it },
@@ -144,9 +158,9 @@ fun DashboardScreen(onLogout: () -> Unit ) {
             confirmButton = {
                 androidx.compose.material3.Button(
                     onClick = {
-                        if (newAssetNo.isNotBlank()) {
-                            viewModel.addAsset(newAssetNo, newDesc, newLoc, newRem)
+                        viewModel.addAsset(newAssetNo, newDesc, newLoc, newRem) {
                             showAddDialog = false
+                            newAssetNo = ""; newDesc = ""; newLoc = ""; newRem = ""
                         }
                     }
                 ) {
@@ -256,7 +270,6 @@ fun DashboardScreen(onLogout: () -> Unit ) {
 
                     ExportOptionButton(
                         label = "CSV",
-//                        icon = Icons.Default.Abc,
                         onClick = {
                             viewModel.exportToCsv(context)
                             showExportDialog = false
@@ -265,7 +278,6 @@ fun DashboardScreen(onLogout: () -> Unit ) {
 
                     ExportOptionButton(
                         label = "Excel",
-//                        icon = androidx.compose.material.icons.Icons.Default.A,
                         onClick = {
                             viewModel.exportToExcel(context)
                             showExportDialog = false
@@ -274,7 +286,6 @@ fun DashboardScreen(onLogout: () -> Unit ) {
 
                     ExportOptionButton(
                         label = "PDF",
-//                        icon = androidx.compose.material.icons.Icons.Default.Info,
                         onClick = {
                             viewModel.exportToPdf(context)
                             showExportDialog = false
@@ -316,6 +327,7 @@ fun DashboardScreen(onLogout: () -> Unit ) {
                         DropdownMenuItem(
                             text = { Text("Add Asset") },
                             onClick = {
+                                viewModel.clearAssetError()
                                 showMenu = false
                                 showAddDialog = true
                             },
@@ -501,12 +513,3 @@ fun DashboardScreen(onLogout: () -> Unit ) {
 }
 
 
-class AssetViewModelFactory(private val dao: com.example.fixedassetinventory.data.dao.AssetDao) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(AssetViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return AssetViewModel(dao) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}

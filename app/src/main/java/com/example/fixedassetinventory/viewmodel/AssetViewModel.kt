@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.fixedassetinventory.data.dao.AssetDao
 import com.example.fixedassetinventory.data.entity.Asset
@@ -45,10 +46,11 @@ enum class ValidationStatus {
 
 class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
 
-    // Kusa itong mag-uupdate kapag may nabago sa Database (LIFESAVER!)
     val assets: StateFlow<List<Asset>> = assetDao.getAllAssets()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    var assetError by mutableStateOf<String?>(null)
+        private set
     var importSummary by mutableStateOf<ImportSummary?>(null)
         private set
 
@@ -65,20 +67,49 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
         assetNumber: String,
         description: String,
         location: String,
-        remarks: String
+        remarks: String,
+        onSuccess: () -> Unit
     ) {
+        val tNo = assetNumber.trim()
+        val tDesc = description.trim()
+        val tLoc = location.trim()
+        val tRem = remarks.trim()
+
+
+        if (tNo.isBlank() || tDesc.isBlank() || tLoc.isBlank()) {
+            assetError = "All fields are required"
+            return
+        }
+
+
         viewModelScope.launch(Dispatchers.IO) {
+            val existing = assetDao.exists(tNo)
+
+            if (existing) {
+                withContext(Dispatchers.Main) {
+                    assetError = "Asset number must be unique."
+                }
+                return@launch
+            }
+
             val newAsset = Asset(
-                assetNumber = assetNumber,
-                description = description,
-                location = location,
-                remarks = remarks,
+                assetNumber = tNo,
+                description = tDesc,
+                location = tLoc,
+                remarks = tRem,
                 validate = "Not Found"
             )
+
             assetDao.insertAsset(newAsset)
+
+            withContext(Dispatchers.Main) {
+                assetError = null
+                onSuccess()
+            }
         }
     }
 
+    fun clearAssetError() { assetError = null }
 
 
 
@@ -152,7 +183,7 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
                             val loc = tokens[2].trim()
                             val rem = tokens[3].trim()
 
-                            // Check sa Database kung existing na
+
                             val alreadyExists = assetDao.exists(assetNo)
 
                             if (assetNo.isNotEmpty() && !alreadyExists) {
@@ -170,12 +201,10 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
                     }
                 }
 
-                // ETO YUNG IMPORTANTE: Save sa Room
                 if (validAssets.isNotEmpty()) {
                     assetDao.insertAll(validAssets)
                 }
 
-                // Ipakita ang Summary sa UI
                 withContext(Dispatchers.Main) {
                     importSummary = ImportSummary(totalCount, successCount, skippedCount)
                 }
@@ -250,7 +279,7 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
                 workbook.write(fos)
                 fos.flush()
             }
-//            file.outputStream().use{ workbook.write(it) }
+
             workbook.close()
 
             withContext(Dispatchers.Main) {
@@ -268,17 +297,16 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
                 val fileName = "asset_report_$dateStamp.pdf"
                 val file = File(Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS), fileName)
 
-                // 1. Initialize Document (iTextG)
+                // 1. Initialize Document
                 val document = Document()
 
                 // 2. Open Stream
                 file.outputStream().use { fos ->
-                    // I-bind ang document sa stream
+
                     PdfWriter.getInstance(document, fos)
 
                     document.open()
 
-                    // 3. Create Table (5 columns)
                     val table = PdfPTable(5)
                     table.widthPercentage = 100f
 
@@ -299,7 +327,7 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
 
                     document.add(table)
 
-                    // 4. IMPORTANT: Close the document INSIDE the use block
+
                     document.close()
                 }
 
@@ -318,7 +346,15 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
     fun closeDialog() {
         showValidationDialog = false
     }
-
+    companion object {
+        fun provideFactory(assetDao: AssetDao): ViewModelProvider.Factory =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return AssetViewModel(assetDao) as T
+                }
+            }
+    }
 }
 
 
