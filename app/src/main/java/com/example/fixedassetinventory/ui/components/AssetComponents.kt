@@ -104,14 +104,6 @@ fun AssetCard(
                     }
                 )
 
-                // Maliit na label para sa Asset Number (#A001 style)
-//                Text(
-//                    text = "#${asset.assetNumber}",
-//                    style = MaterialTheme.typography.labelSmall,
-//                    color = MaterialTheme.colorScheme.primary,
-//                    fontWeight = FontWeight.SemiBold
-//                )
-
                 Divider(
                     modifier = Modifier.padding(vertical = 8.dp),
                     thickness = 1.5.dp,
