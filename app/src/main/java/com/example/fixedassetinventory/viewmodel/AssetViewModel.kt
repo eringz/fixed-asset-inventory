@@ -70,7 +70,7 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
         remarks: String,
         onSuccess: () -> Unit
     ) {
-        val tNo = assetNumber.trim()
+        val tNo = assetNumber.trim().uppercase()
         val tDesc = description.trim()
         val tLoc = location.trim()
         val tRem = remarks.trim()
@@ -110,8 +110,6 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
     }
 
     fun clearAssetError() { assetError = null }
-
-
 
     fun validateAsset(assetNo: String) {
         val trimmedNo = assetNo.trim()
@@ -297,10 +295,10 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
                 val fileName = "asset_report_$dateStamp.pdf"
                 val file = File(Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS), fileName)
 
-                // 1. Initialize Document
+                // Initialize Document
                 val document = Document()
 
-                // 2. Open Stream
+                // Open Stream
                 file.outputStream().use { fos ->
 
                     PdfWriter.getInstance(document, fos)
@@ -311,7 +309,7 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
                     table.widthPercentage = 100f
 
                     // Headers
-                    val headers = listOf("Asset No", "Description", "Location", "Remarks", "Status")
+                    val headers = listOf("asset_number", "description", "location", "remarks", "validate")
                     headers.forEach {
                         table.addCell(Phrase(it))
                     }

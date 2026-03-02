@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.fixedassetinventory.viewmodel.AuthViewModel
+import androidx.compose.ui.graphics.Color
+
 
 @Composable
 fun LoginScreen(
@@ -75,7 +77,10 @@ fun LoginScreen(
         }
 
         androidx.compose.material3.TextButton(onClick = onNavigateToRegister) {
-            Text("Don't have an account? Register here")
+            Text(
+                text = "Don't have an account? Register here",
+                color = Color(0xFF2E7D32)
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))

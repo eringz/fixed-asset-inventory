@@ -20,7 +20,7 @@ interface AssetDao {
     @Query("SELECT * FROM assets WHERE UPPER(asset_number) = UPPER(:assetNum) LIMIT 1")
     suspend fun findAssetByNumber(assetNum: String): Asset?
 
-    @Query("SELECT 1 FROM assets WHERE asset_number = :assetNo")
+    @Query("SELECT 1 FROM assets WHERE UPPER(asset_number) = UPPER(:assetNo)")
     suspend fun exists(assetNo: String): Boolean
 
     @Query("SELECT * FROM assets ORDER BY asset_number ASC")
