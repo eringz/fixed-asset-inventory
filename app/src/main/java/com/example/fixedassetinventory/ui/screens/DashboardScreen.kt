@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -51,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.fixedassetinventory.data.entity.Asset
 import com.example.fixedassetinventory.ui.components.AssetCard
+import com.example.fixedassetinventory.ui.components.BaseDialog
 import com.example.fixedassetinventory.ui.components.ExportOptionButton
 import com.example.fixedassetinventory.viewmodel.AssetViewModel
 import com.example.fixedassetinventory.viewmodel.ValidationStatus
@@ -106,73 +108,110 @@ fun DashboardScreen(
         var newLoc by remember { mutableStateOf("") }
         var newRem by remember { mutableStateOf("") }
 
-        androidx.compose.material3.AlertDialog(
+//        androidx.compose.material3.AlertDialog(
+//            onDismissRequest = {
+//                showAddDialog = false
+//                viewModel.clearAssetError()
+//            },
+//            title = { Text("Asset Registration", fontWeight = FontWeight.Bold)},
+//            text = {
+//                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+//                    Box(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .height(24.dp), // Fixed height para reserved ang space
+//                        contentAlignment = Alignment.CenterStart
+//                    ) {
+//                        if (viewModel.assetError != null) {
+//                            Text(
+//                                text = viewModel.assetError!!,
+//                                color = Color.Red,
+//                                style = MaterialTheme.typography.bodySmall,
+//                                fontWeight = FontWeight.Medium
+//                            )
+//                        }
+//                    }
+//                    OutlinedTextField(
+//                        value = newAssetNo,
+//                        onValueChange = { newAssetNo = it },
+//                        label = { Text("Asset Number")},
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+//                    OutlinedTextField(
+//                        value = newDesc,
+//                        onValueChange = { newDesc = it },
+//                        label = { Text("Description")},
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+//                    OutlinedTextField(
+//                        value = newLoc,
+//                        onValueChange = { newLoc = it },
+//                        label = { Text("Location")},
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+//                    OutlinedTextField(
+//                        value = newRem,
+//                        onValueChange = { newRem = it },
+//                        label = { Text("Remarks")},
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+//                }
+//            },
+//            confirmButton = {
+//                androidx.compose.material3.Button(
+//                    onClick = {
+//                        viewModel.addAsset(newAssetNo, newDesc, newLoc, newRem) {
+//                                showAddDialog = false
+//                                newAssetNo = ""; newDesc = ""; newLoc = ""; newRem = ""
+//                            }
+//                        }
+//                    ) {
+//                        Text("Save Asset")
+//                    }
+//                },
+//                dismissButton = {
+//                    androidx.compose.material3.TextButton(onClick = { showAddDialog = false }) {
+//                        Text("Cancel")
+//                    }
+//                }
+//            )
+        BaseDialog(
             onDismissRequest = {
                 showAddDialog = false
-                viewModel.clearAssetError()
+                viewModel.closeDialog()
             },
-            title = { Text("Asset Registration", fontWeight = FontWeight.Bold)},
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(24.dp), // Fixed height para reserved ang space
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        if (viewModel.assetError != null) {
-                            Text(
-                                text = viewModel.assetError!!,
-                                color = Color.Red,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-                    OutlinedTextField(
-                        value = newAssetNo,
-                        onValueChange = { newAssetNo = it },
-                        label = { Text("Asset Number")},
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        value = newDesc,
-                        onValueChange = { newDesc = it },
-                        label = { Text("Description")},
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        value = newLoc,
-                        onValueChange = { newLoc = it },
-                        label = { Text("Location")},
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        value = newRem,
-                        onValueChange = { newRem = it },
-                        label = { Text("Remarks")},
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
+            title = "Asset Registration",
             confirmButton = {
-                androidx.compose.material3.Button(
-                    onClick = {
-                        viewModel.addAsset(newAssetNo, newDesc, newLoc, newRem) {
-                            showAddDialog = false
-                            newAssetNo = ""; newDesc = ""; newLoc = ""; newRem = ""
-                        }
+                Button(onClick = {
+                    viewModel.addAsset(newAssetNo, newDesc, newLoc, newRem) {
+                        showAddDialog = false
+                        newAssetNo = ""; newDesc = ""; newLoc = ""; newRem = ""
                     }
-                ) {
+                }) {
                     Text("Save Asset")
                 }
-            },
-            dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { showAddDialog = false }) {
-                    Text("Cancel")
-                }
             }
-        )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(24.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                if (viewModel.assetError != null) {
+                    Text(
+                        text = viewModel.assetError!!,
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+//                val assetFields = listOf(
+//                    AssetField("Asset Number")
+//                )
+            }
+        }
     }
 
     // EDIT DIALOG
