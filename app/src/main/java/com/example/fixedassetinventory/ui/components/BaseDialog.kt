@@ -20,7 +20,7 @@ fun BaseDialog(
     content: @Composable () -> Unit
 ) {
     AlertDialog(
-        onDismissRequest = { /*TODO*/ },
+        onDismissRequest = onDismissRequest,
         title = { Text(text = title, fontWeight = FontWeight.Bold) },
         text = {
             Column(

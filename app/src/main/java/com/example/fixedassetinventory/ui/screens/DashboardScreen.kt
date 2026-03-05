@@ -1,6 +1,6 @@
 package com.example.fixedassetinventory.ui.screens
 
-import android.net.Uri
+import  android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +39,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,8 +53,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.fixedassetinventory.data.entity.Asset
 import com.example.fixedassetinventory.ui.components.AssetCard
+import com.example.fixedassetinventory.ui.components.AssetFormContent
 import com.example.fixedassetinventory.ui.components.BaseDialog
 import com.example.fixedassetinventory.ui.components.ExportOptionButton
+import com.example.fixedassetinventory.ui.state.AssetFormState
 import com.example.fixedassetinventory.viewmodel.AssetViewModel
 import com.example.fixedassetinventory.viewmodel.ValidationStatus
 
@@ -74,6 +77,7 @@ fun DashboardScreen(
     var assetByEdit by remember { mutableStateOf<Asset?>(null) }
     var assetByDelete by remember { mutableStateOf<Asset?>(null) }
     var showExportDialog by remember { mutableStateOf(false) }
+    val formState = remember { AssetFormState() }
 
 
     // ----------------------------------------------------------------------------------
@@ -102,79 +106,7 @@ fun DashboardScreen(
     //-----------------------------------------------------------------------------------
 
     // CREATE DIALOG
-    if (showAddDialog) {
-        var newAssetNo by remember { mutableStateOf("") }
-        var newDesc by remember { mutableStateOf("") }
-        var newLoc by remember { mutableStateOf("") }
-        var newRem by remember { mutableStateOf("") }
-
-//        androidx.compose.material3.AlertDialog(
-//            onDismissRequest = {
-//                showAddDialog = false
-//                viewModel.clearAssetError()
-//            },
-//            title = { Text("Asset Registration", fontWeight = FontWeight.Bold)},
-//            text = {
-//                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-//                    Box(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .height(24.dp), // Fixed height para reserved ang space
-//                        contentAlignment = Alignment.CenterStart
-//                    ) {
-//                        if (viewModel.assetError != null) {
-//                            Text(
-//                                text = viewModel.assetError!!,
-//                                color = Color.Red,
-//                                style = MaterialTheme.typography.bodySmall,
-//                                fontWeight = FontWeight.Medium
-//                            )
-//                        }
-//                    }
-//                    OutlinedTextField(
-//                        value = newAssetNo,
-//                        onValueChange = { newAssetNo = it },
-//                        label = { Text("Asset Number")},
-//                        modifier = Modifier.fillMaxWidth()
-//                    )
-//                    OutlinedTextField(
-//                        value = newDesc,
-//                        onValueChange = { newDesc = it },
-//                        label = { Text("Description")},
-//                        modifier = Modifier.fillMaxWidth()
-//                    )
-//                    OutlinedTextField(
-//                        value = newLoc,
-//                        onValueChange = { newLoc = it },
-//                        label = { Text("Location")},
-//                        modifier = Modifier.fillMaxWidth()
-//                    )
-//                    OutlinedTextField(
-//                        value = newRem,
-//                        onValueChange = { newRem = it },
-//                        label = { Text("Remarks")},
-//                        modifier = Modifier.fillMaxWidth()
-//                    )
-//                }
-//            },
-//            confirmButton = {
-//                androidx.compose.material3.Button(
-//                    onClick = {
-//                        viewModel.addAsset(newAssetNo, newDesc, newLoc, newRem) {
-//                                showAddDialog = false
-//                                newAssetNo = ""; newDesc = ""; newLoc = ""; newRem = ""
-//                            }
-//                        }
-//                    ) {
-//                        Text("Save Asset")
-//                    }
-//                },
-//                dismissButton = {
-//                    androidx.compose.material3.TextButton(onClick = { showAddDialog = false }) {
-//                        Text("Cancel")
-//                    }
-//                }
-//            )
+    if (showAddDialog)  {
         BaseDialog(
             onDismissRequest = {
                 showAddDialog = false
@@ -183,74 +115,58 @@ fun DashboardScreen(
             title = "Asset Registration",
             confirmButton = {
                 Button(onClick = {
-                    viewModel.addAsset(newAssetNo, newDesc, newLoc, newRem) {
+                    viewModel.addAsset(
+                        formState.asssetNo,
+                        formState.description,
+                        formState.location,
+                        formState.remarks
+                    ) {
                         showAddDialog = false
-                        newAssetNo = ""; newDesc = ""; newLoc = ""; newRem = ""
+                        formState.reset()
                     }
                 }) {
                     Text("Save Asset")
                 }
             }
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(24.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                if (viewModel.assetError != null) {
-                    Text(
-                        text = viewModel.assetError!!,
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-
-//                val assetFields = listOf(
-//                    AssetField("Asset Number")
-//                )
-            }
+            AssetFormContent(formState, error = viewModel.assetError)
         }
     }
 
     // EDIT DIALOG
     if (assetByEdit != null) {
-        var desc by remember { mutableStateOf(assetByEdit!!.description) }
-        var loc by remember { mutableStateOf(assetByEdit!!.location) }
-        var rem by remember { mutableStateOf(assetByEdit!!.remarks) }
+        LaunchedEffect(assetByEdit) {
+            formState.asssetNo = assetByEdit!!.assetNumber
+            formState.description = assetByEdit!!.description
+            formState.location = assetByEdit!!.location
+            formState.remarks = assetByEdit!!.remarks
+        }
 
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = {  assetByEdit = null },
-            title = { Text("Edit Asset: ${assetByEdit!!.assetNumber}", fontWeight = FontWeight.Bold)},
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(value = desc, onValueChange = { desc = it }, label = { Text("Description")})
-                    OutlinedTextField(value = loc, onValueChange = { loc = it }, label = { Text("Location")} )
-                    OutlinedTextField(value = rem, onValueChange = { rem = it }, label = { Text("Remarks")} )
-                }
+        BaseDialog(
+            onDismissRequest = {
+                assetByEdit = null
+                formState.reset()
             },
+            title = "Edit Asset",
             confirmButton = {
-                androidx.compose.material3.Button(
+                Button(
                     onClick = {
-                        val updateAsset = assetByEdit!!.copy(
-                            description = desc,
-                            location = loc,
-                            remarks = rem,
+                        val updated = assetByEdit!!.copy(
+                            description = formState.description,
+                            location = formState.location,
+                            remarks = formState.remarks
                         )
-                        viewModel.updateAsset(updateAsset)
+                        viewModel.updateAsset(updated)
                         assetByEdit = null
-                    },
+                        formState.reset()
+                    }
                 ) {
                     Text("Save Changes")
                 }
-            },
-            dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { assetByEdit = null }) {
-                    Text("Cancel")
-                }
             }
-        )
+        ) {
+            AssetFormContent(formState, isEditMode = true, error = viewModel.assetError)
+        }
     }
 
     // DELETE DIALOG
