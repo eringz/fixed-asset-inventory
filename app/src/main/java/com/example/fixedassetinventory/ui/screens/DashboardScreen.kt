@@ -171,27 +171,41 @@ fun DashboardScreen(
 
     // DELETE DIALOG
     if (assetByDelete != null) {
-        androidx.compose.material3.AlertDialog(
+//        androidx.compose.material3.AlertDialog(
+//            onDismissRequest = { assetByDelete = null },
+//            title = { Text("Confirm Delete", fontWeight = FontWeight.Bold) },
+//            text = { Text("Are you sure you want to delete asset ${assetByDelete!!.assetNumber}?")},
+//            confirmButton = {
+//                Button(
+//                    onClick = {
+//                        viewModel.deleteAsset(assetByDelete!!)
+//                        assetByDelete = null
+//                    },
+//                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color.Red)
+//                ) {
+//                    Text("Delete", color = Color.White)
+//                }
+//            },
+//            dismissButton = {
+//                androidx.compose.material3.TextButton(onClick = { assetByDelete = null }) {
+//                    Text("Cancel")
+//                }
+//            }
+//        )
+        BaseDialog(
             onDismissRequest = { assetByDelete = null },
-            title = { Text("Confirm Delete", fontWeight = FontWeight.Bold) },
-            text = { Text("Are you sure you want to delete asset ${assetByDelete!!.assetNumber}?")},
+            title = "Confirm Delete",
             confirmButton = {
-                androidx.compose.material3.Button(
+                Button(
                     onClick = {
                         viewModel.deleteAsset(assetByDelete!!)
                         assetByDelete = null
-                    },
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) {
-                    Text("Delete", color = Color.White)
-                }
-            },
-            dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { assetByDelete = null }) {
-                    Text("Cancel")
-                }
+                    }
+                ) { Text("Delete", color = Color.White) }
             }
-        )
+        ) {
+            Text("Are you sure you want to delete ass ${assetByDelete!!.assetNumber}")
+        }
     }
 
     // IMPORT DIALOG
