@@ -73,4 +73,5 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
     implementation("com.itextpdf:itextg:5.5.10")
 
+
 }

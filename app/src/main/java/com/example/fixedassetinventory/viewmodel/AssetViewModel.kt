@@ -44,7 +44,9 @@ enum class ValidationStatus {
     FOUND
 }
 
-class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
+class AssetViewModel(
+    private val assetDao: AssetDao
+) : ViewModel() {
 
     val assets: StateFlow<List<Asset>> = assetDao.getAllAssets()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -97,7 +99,6 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
                 description = tDesc,
                 location = tLoc,
                 remarks = tRem,
-                validate = "Not Found"
             )
 
             assetDao.insertAsset(newAsset)
@@ -189,7 +190,7 @@ class AssetViewModel(private val assetDao: AssetDao) : ViewModel() {
                                     assetNumber = assetNo,
                                     description = desc,
                                     location = loc,
-                                    remarks = rem
+                                    remarks = rem,
                                 ))
                                 successCount++
                             } else {
