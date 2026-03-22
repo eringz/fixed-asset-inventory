@@ -1,18 +1,19 @@
+import com.android.build.api.dsl.ApplicationExtension
+
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ksp)
-//    kotlin("plugin.serialization") version "2.0.21"
+    alias(libs.plugins.kotlinCompose)
 }
 
-android {
+extensions.configure<ApplicationExtension> {
     namespace = "com.example.fixedassetinventory"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.fixedassetinventory"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -32,14 +33,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
     }
     packaging {
         resources {
@@ -48,8 +43,15 @@ android {
     }
 }
 
-dependencies {
+kotlin {
+    jvmToolchain(17)
+}
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -59,6 +61,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.foundation)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -66,13 +69,13 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-    implementation("androidx.navigation:navigation-compose:2.8.5")
-    implementation("org.apache.poi:poi-ooxml:5.2.3")
-    implementation("androidx.compose.material:material-icons-extended:1.6.0")
-    implementation("com.itextpdf:itextg:5.5.10")
-
-
+    
+    implementation(libs.navigation.compose)
+    implementation(libs.poi.ooxml)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.itextg)
 }
