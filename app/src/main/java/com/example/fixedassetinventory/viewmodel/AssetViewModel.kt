@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.fixedassetinventory.data.dao.AssetDao
 import com.example.fixedassetinventory.data.entity.Asset
+import com.example.fixedassetinventory.utils.DateUtils
 import com.itextpdf.text.Document
 import com.itextpdf.text.Phrase
 import com.itextpdf.text.pdf.PdfPTable
@@ -99,6 +100,8 @@ class AssetViewModel(
                 description = tDesc,
                 location = tLoc,
                 remarks = tRem,
+                validate = "Not Found",
+                updatedAt = System.currentTimeMillis()
             )
 
             assetDao.insertAsset(newAsset)
@@ -191,6 +194,7 @@ class AssetViewModel(
                                     description = desc,
                                     location = loc,
                                     remarks = rem,
+                                    updatedAt = System.currentTimeMillis()
                                 ))
                                 successCount++
                             } else {
@@ -355,5 +359,3 @@ class AssetViewModel(
             }
     }
 }
-
-
