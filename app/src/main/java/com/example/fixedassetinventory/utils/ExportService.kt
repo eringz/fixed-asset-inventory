@@ -1,18 +1,29 @@
 package com.example.fixedassetinventory.utils
 
-import android.content.Context
-import android.graphics.pdf.PdfDocument
-import android.widget.Toast
-import androidx.compose.foundation.pager.PageInfo
 import com.example.fixedassetinventory.data.entity.Asset
+
+import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import android.graphics.Paint
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import android.graphics.Color
-import java.io.File
+import android.widget.Toast
+
+
 import java.io.FileOutputStream
+import java.io.File
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+
+
+
+import android.graphics.Paint
 import android.graphics.Canvas
+import com.itextpdf.text.Document as ITextDocument
+import com.itextpdf.text.Phrase
+import com.itextpdf.text.pdf.PdfPTable
+import com.itextpdf.text.pdf.PdfWriter
+
+import android.graphics.Color
+import android.util.Log.e
 
 
 class ExportService(private val context: Context) {
@@ -90,27 +101,32 @@ class ExportService(private val context: Context) {
     }
 
     suspend fun exportToPDF(assets: List<Asset>): File? = withContext(Dispatchers.IO) {
-            val file = File(context.cacheDir, "asset_report_${System.currentTimeMillis()}")
-//        val file = File(Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS), fileName)
-            val document = PdfDocument()
+        val file = File(context.cacheDir, "asset_report_${System.currentTimeMillis()}.pdf")
+        val document = ITextDocument()
         try {
-            val pageInfo = document.
-            val page = document.startPage(pageInfo)
-            val canvas: Canvas = page.canvas
-            val paint = Paint()
+            FileOutputStream(file).use { fos ->
+                PdfWriter.getInstance(document, fos)
+                document.open()
 
-            paint.textAlign = Paint.Align.CENTER
-            paint.textSize = 18f
-            paint.isFakeBoldText = true
-            canvas.drawText("Fixed Asset Inventory Report", 297f, 50f, paint)
+                val table = PdfPTable(6)
+                table.widthPercentage = 100f
+                val headers = listOf("Asset No", "Description", "Location", "Remarks", "Validate", "Date Created")
+                headers.forEach {
+                    table.addCell(Phrase(it))
+                }
 
-            paint.textAlign = Paint.Align.LEFT
-            paint.textSize = 12f
-            paint.isFakeBoldText = true
-            var yPosition = 100f
+                assets.forEach { asset ->
+                    table.addCell(Phrase(asset.assetNumber))
+                    table.addCell(Phrase(asset.description))
+                    table.addCell(Phrase(asset.location))
+                    table.addCell(Phrase(asset.remarks))
+                    table.addCell(Phrase(asset.validate))
+                    table.addCell(Phrase(DateUtils.formatMillis(asset.createdAt)))
+                }
 
-
-
+                document.add(table)
+                document.close()
+            }
             return@withContext file
         } catch (e: Exception) {
             e.printStackTrace()
@@ -119,6 +135,5 @@ class ExportService(private val context: Context) {
             }
             null
         }
-
     }
 }
