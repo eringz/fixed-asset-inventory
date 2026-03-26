@@ -1,21 +1,33 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Apache POI rules
+-dontwarn org.apache.poi.**
+-dontwarn org.apache.commons.collections4.**
+-dontwarn javax.xml.stream.**
+-dontwarn com.zaxxer.sparsebits.**
+-dontwarn org.checkerframework.**
+-dontwarn com.github.luben.zstd.**
+-dontwarn org.tukaani.xz.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.apache.xmlbeans.**
+-dontwarn org.openxmlformats.schemas.**
+-dontwarn org.etsi.uri.x01903.v13.**
+-dontwarn org.w3.x2000.x09.xmldsig.**
+-dontwarn com.microsoft.schemas.**
+-dontwarn org.apache.logging.log4j.**
+-dontwarn aQute.bnd.annotation.**
+-dontwarn edu.umd.cs.findbugs.annotations.**
+-dontwarn org.osgi.framework.**
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+-keep class org.apache.poi.** { *; }
+-keep class org.apache.xmlbeans.** { *; }
+-keep class org.openxmlformats.schemas.** { *; }
+-keep class com.microsoft.schemas.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# iTextG rules
+-dontwarn com.itextpdf.**
+-keep class com.itextpdf.** { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# General
+-dontwarn java.awt.**
+-dontwarn javax.xml.**
+-dontwarn org.w3c.dom.**
+-dontwarn org.xml.sax.**
