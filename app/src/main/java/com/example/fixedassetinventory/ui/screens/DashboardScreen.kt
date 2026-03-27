@@ -239,8 +239,6 @@ fun DashboardScreen(
                             showExportDialog = false
                         }
                     )
-
-
                 }
             },
             confirmButton = {},
@@ -350,8 +348,8 @@ fun DashboardScreen(
                     text = { Text("Item does not exist.") }
                 )
             }
-            // Search
 
+            // Search
             Box(modifier = Modifier.fillMaxWidth()) {
                 Column {
                     OutlinedTextField(
@@ -406,6 +404,8 @@ fun DashboardScreen(
                                 tint = statusColor
                             )
                             Spacer(modifier = Modifier.width(12.dp))
+
+                            //
                             Column {
                                 Text(
                                     text = currentStatusLabel,
