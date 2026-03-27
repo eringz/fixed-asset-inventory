@@ -46,7 +46,15 @@ fun RegisterScreen(
             color = Color(0xFF2E7D32)
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = viewModel.errorMessage ?: "",
+            color = MaterialTheme.colorScheme.error,
+//            modifier = Modifier.padding(start = 16.dp, top = 4.dp).height(16.dp)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             value = username,
@@ -82,12 +90,5 @@ fun RegisterScreen(
         TextButton(onClick = onNavigateToLogin) {
             Text("Already have an account? Login")
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = viewModel.errorMessage ?: "",
-            color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.padding(start = 16.dp, top = 4.dp).height(16.dp)
-        )
     }
 }
